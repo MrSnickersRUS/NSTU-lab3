@@ -1,0 +1,1788 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>containers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">lab3_go/containers/array.go (88.9%)</option>
+				
+				<option value="file1">lab3_go/containers/avl.go (88.8%)</option>
+				
+				<option value="file2">lab3_go/containers/cuckoo.go (85.7%)</option>
+				
+				<option value="file3">lab3_go/containers/doublelist.go (94.0%)</option>
+				
+				<option value="file4">lab3_go/containers/hashmap.go (83.5%)</option>
+				
+				<option value="file5">lab3_go/containers/queue.go (90.7%)</option>
+				
+				<option value="file6">lab3_go/containers/set.go (100.0%)</option>
+				
+				<option value="file7">lab3_go/containers/singlelist.go (92.4%)</option>
+				
+				<option value="file8">lab3_go/containers/stack.go (88.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+)
+
+// Array - динамический массив
+type Array struct {
+        data     []int
+        capacity int
+        length   int
+}
+
+// NewArray создаёт новый массив
+func NewArray(initialCapacity int) *Array <span class="cov8" title="1">{
+        if initialCapacity &lt;= 0 </span><span class="cov0" title="0">{
+                initialCapacity = 10
+        }</span>
+        <span class="cov8" title="1">return &amp;Array{
+                data:     make([]int, initialCapacity),
+                capacity: initialCapacity,
+                length:   0,
+        }</span>
+}
+
+// Push добавляет элемент в конец
+func (a *Array) Push(value int) <span class="cov8" title="1">{
+        if a.length &gt;= a.capacity </span><span class="cov8" title="1">{
+                a.resize(a.capacity * 2)
+        }</span>
+        <span class="cov8" title="1">a.data[a.length] = value
+        a.length++</span>
+}
+
+// Get возвращает элемент по индексу
+func (a *Array) Get(index int) (int, error) <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.length </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("индекс массива выходит за границы")
+        }</span>
+        <span class="cov8" title="1">return a.data[index], nil</span>
+}
+
+// Insert вставляет элемент по индексу
+func (a *Array) Insert(index int, value int) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt; a.length </span><span class="cov8" title="1">{
+                return fmt.Errorf("индекс массива выходит за границы")
+        }</span>
+        <span class="cov8" title="1">if a.length &gt;= a.capacity </span><span class="cov0" title="0">{
+                a.resize(a.capacity * 2)
+        }</span>
+        // Сдвигаем элементы вправо
+        <span class="cov8" title="1">for i := a.length; i &gt; index; i-- </span><span class="cov8" title="1">{
+                a.data[i] = a.data[i-1]
+        }</span>
+        <span class="cov8" title="1">a.data[index] = value
+        a.length++
+        return nil</span>
+}
+
+// Remove удаляет элемент по индексу
+func (a *Array) Remove(index int) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.length </span><span class="cov8" title="1">{
+                return fmt.Errorf("индекс массива выходит за границы")
+        }</span>
+        // Сдвигаем элементы влево
+        <span class="cov8" title="1">for i := index; i &lt; a.length-1; i++ </span><span class="cov8" title="1">{
+                a.data[i] = a.data[i+1]
+        }</span>
+        <span class="cov8" title="1">a.length--
+        return nil</span>
+}
+
+// Replace заменяет элемент по индексу
+func (a *Array) Replace(index int, value int) error <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= a.length </span><span class="cov8" title="1">{
+                return fmt.Errorf("индекс массива выходит за границы")
+        }</span>
+        <span class="cov8" title="1">a.data[index] = value
+        return nil</span>
+}
+
+// Size возвращает количество элементов
+func (a *Array) Size() int <span class="cov8" title="1">{
+        return a.length
+}</span>
+
+// Clear очищает массив
+func (a *Array) Clear() <span class="cov8" title="1">{
+        a.length = 0
+}</span>
+
+// Print выводит массив
+func (a *Array) Print() string <span class="cov8" title="1">{
+        if a.length == 0 </span><span class="cov8" title="1">{
+                return "[]"
+        }</span>
+        <span class="cov8" title="1">result := "["
+        for i := 0; i &lt; a.length; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        result += ", "
+                }</span>
+                <span class="cov8" title="1">result += fmt.Sprintf("%d", a.data[i])</span>
+        }
+        <span class="cov8" title="1">result += "]"
+        return result</span>
+}
+
+// resize увеличивает ёмкость массива
+func (a *Array) resize(newCapacity int) <span class="cov8" title="1">{
+        newData := make([]int, newCapacity)
+        copy(newData, a.data[:a.length])
+        a.data = newData
+        a.capacity = newCapacity
+}</span>
+
+// SaveToBinary сохраняет массив в бинарном формате
+func (a *Array) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        // Записываем длину
+        if err := binary.Write(w, binary.LittleEndian, int32(a.length)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        // Записываем элементы
+        <span class="cov8" title="1">for i := 0; i &lt; a.length; i++ </span><span class="cov8" title="1">{
+                if err := binary.Write(w, binary.LittleEndian, int32(a.data[i])); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает массив из бинарного формата
+func (a *Array) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        a.Clear()
+
+        // Читаем длину
+        var length int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;length); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Читаем элементы
+        <span class="cov8" title="1">for i := 0; i &lt; int(length); i++ </span><span class="cov8" title="1">{
+                var value int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">a.Push(int(value))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// ToJSON сериализует массив в JSON
+func (a *Array) ToJSON() (string, error) <span class="cov8" title="1">{
+        data := a.data[:a.length]
+        bytes, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return string(bytes), nil</span>
+}
+
+// FromJSON десериализует массив из JSON
+func (a *Array) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        a.Clear()
+        var data []int
+        if err := json.Unmarshal([]byte(jsonStr), &amp;data); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for _, val := range data </span><span class="cov8" title="1">{
+                a.Push(val)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+)
+
+// AVLTree - самобалансирующееся дерево
+type AVLTree struct {
+        root  *avlNode
+        count int
+}
+
+type avlNode struct {
+        value  string
+        height int
+        left   *avlNode
+        right  *avlNode
+}
+
+// NewAVLTree создаёт новое AVL-дерево
+func NewAVLTree() *AVLTree <span class="cov8" title="1">{
+        return &amp;AVLTree{
+                root:  nil,
+                count: 0,
+        }
+}</span>
+
+// Insert вставляет значение в дерево
+func (t *AVLTree) Insert(value string) <span class="cov8" title="1">{
+        t.root = t.insertNode(t.root, value)
+}</span>
+
+// Remove удаляет значение из дерева
+func (t *AVLTree) Remove(value string) <span class="cov8" title="1">{
+        t.root = t.deleteNode(t.root, value)
+}</span>
+
+// Search ищет значение в дереве
+func (t *AVLTree) Search(value string) bool <span class="cov8" title="1">{
+        return t.searchNode(t.root, value)
+}</span>
+
+// Clear очищает дерево
+func (t *AVLTree) Clear() <span class="cov8" title="1">{
+        t.root = nil
+        t.count = 0
+}</span>
+
+// Size возвращает количество элементов
+func (t *AVLTree) Size() int <span class="cov8" title="1">{
+        return t.count
+}</span>
+
+// Height возвращает высоту дерева
+func (t *AVLTree) Height() int <span class="cov8" title="1">{
+        return t.getHeight(t.root)
+}</span>
+
+// Print выводит дерево (in-order traversal)
+func (t *AVLTree) Print() string <span class="cov8" title="1">{
+        if t.root == nil </span><span class="cov8" title="1">{
+                return "AVLTree { empty }"
+        }</span>
+        <span class="cov8" title="1">result := "AVLTree { "
+        result += t.inorderTraversal(t.root)
+        result += fmt.Sprintf(" } (size: %d, height: %d)", t.count, t.Height())
+        return result</span>
+}
+
+// getHeight возвращает высоту узла
+func (t *AVLTree) getHeight(node *avlNode) int <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return 0
+        }</span>
+        <span class="cov8" title="1">return node.height</span>
+}
+
+// getBalance возвращает баланс узла
+func (t *AVLTree) getBalance(node *avlNode) int <span class="cov8" title="1">{
+        if node == nil </span><span class="cov0" title="0">{
+                return 0
+        }</span>
+        <span class="cov8" title="1">return t.getHeight(node.left) - t.getHeight(node.right)</span>
+}
+
+// updateHeight обновляет высоту узла
+func (t *AVLTree) updateHeight(node *avlNode) <span class="cov8" title="1">{
+        if node != nil </span><span class="cov8" title="1">{
+                leftHeight := t.getHeight(node.left)
+                rightHeight := t.getHeight(node.right)
+                if leftHeight &gt; rightHeight </span><span class="cov8" title="1">{
+                        node.height = leftHeight + 1
+                }</span> else<span class="cov8" title="1"> {
+                        node.height = rightHeight + 1
+                }</span>
+        }
+}
+
+// rotateRight правый поворот
+func (t *AVLTree) rotateRight(y *avlNode) *avlNode <span class="cov8" title="1">{
+        x := y.left
+        T2 := x.right
+
+        x.right = y
+        y.left = T2
+
+        t.updateHeight(y)
+        t.updateHeight(x)
+
+        return x
+}</span>
+
+// rotateLeft левый поворот
+func (t *AVLTree) rotateLeft(x *avlNode) *avlNode <span class="cov8" title="1">{
+        y := x.right
+        T2 := y.left
+
+        y.left = x
+        x.right = T2
+
+        t.updateHeight(x)
+        t.updateHeight(y)
+
+        return y
+}</span>
+
+// rebalance балансирует узел
+func (t *AVLTree) rebalance(node *avlNode) *avlNode <span class="cov8" title="1">{
+        t.updateHeight(node)
+        balance := t.getBalance(node)
+
+        // Left-Left случай
+        if balance &gt; 1 &amp;&amp; t.getBalance(node.left) &gt;= 0 </span><span class="cov8" title="1">{
+                return t.rotateRight(node)
+        }</span>
+
+        // Left-Right случай
+        <span class="cov8" title="1">if balance &gt; 1 &amp;&amp; t.getBalance(node.left) &lt; 0 </span><span class="cov8" title="1">{
+                node.left = t.rotateLeft(node.left)
+                return t.rotateRight(node)
+        }</span>
+
+        // Right-Right случай
+        <span class="cov8" title="1">if balance &lt; -1 &amp;&amp; t.getBalance(node.right) &lt;= 0 </span><span class="cov8" title="1">{
+                return t.rotateLeft(node)
+        }</span>
+
+        // Right-Left случай
+        <span class="cov8" title="1">if balance &lt; -1 &amp;&amp; t.getBalance(node.right) &gt; 0 </span><span class="cov8" title="1">{
+                node.right = t.rotateRight(node.right)
+                return t.rotateLeft(node)
+        }</span>
+
+        <span class="cov8" title="1">return node</span>
+}
+
+// insertNode вставляет узел рекурсивно
+func (t *AVLTree) insertNode(node *avlNode, value string) *avlNode <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                t.count++
+                return &amp;avlNode{value: value, height: 1}
+        }</span>
+
+        <span class="cov8" title="1">if value &lt; node.value </span><span class="cov8" title="1">{
+                node.left = t.insertNode(node.left, value)
+        }</span> else<span class="cov8" title="1"> if value &gt; node.value </span><span class="cov8" title="1">{
+                node.right = t.insertNode(node.right, value)
+        }</span> else<span class="cov8" title="1"> {
+                // Дубликат - не добавляем
+                return node
+        }</span>
+
+        <span class="cov8" title="1">return t.rebalance(node)</span>
+}
+
+// findMin находит минимальный узел
+func (t *AVLTree) findMin(node *avlNode) *avlNode <span class="cov8" title="1">{
+        for node.left != nil </span><span class="cov8" title="1">{
+                node = node.left
+        }</span>
+        <span class="cov8" title="1">return node</span>
+}
+
+// deleteNode удаляет узел рекурсивно
+func (t *AVLTree) deleteNode(node *avlNode, value string) *avlNode <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">if value &lt; node.value </span><span class="cov8" title="1">{
+                node.left = t.deleteNode(node.left, value)
+        }</span> else<span class="cov8" title="1"> if value &gt; node.value </span><span class="cov0" title="0">{
+                node.right = t.deleteNode(node.right, value)
+        }</span> else<span class="cov8" title="1"> {
+                // Узел найден
+                t.count--
+
+                if node.left == nil </span><span class="cov8" title="1">{
+                        return node.right
+                }</span> else<span class="cov8" title="1"> if node.right == nil </span><span class="cov0" title="0">{
+                        return node.left
+                }</span>
+
+                // Узел с двумя детьми
+                <span class="cov8" title="1">minNode := t.findMin(node.right)
+                node.value = minNode.value
+                node.right = t.deleteNode(node.right, minNode.value)
+                t.count++</span> // Компенсируем декремент
+        }
+
+        <span class="cov8" title="1">return t.rebalance(node)</span>
+}
+
+// searchNode ищет узел рекурсивно
+func (t *AVLTree) searchNode(node *avlNode, value string) bool <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">if value == node.value </span><span class="cov8" title="1">{
+                return true
+        }</span>
+        <span class="cov8" title="1">if value &lt; node.value </span><span class="cov8" title="1">{
+                return t.searchNode(node.left, value)
+        }</span>
+        <span class="cov8" title="1">return t.searchNode(node.right, value)</span>
+}
+
+// inorderTraversal обход дерева in-order
+func (t *AVLTree) inorderTraversal(node *avlNode) string <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">result := t.inorderTraversal(node.left)
+        if result != "" </span><span class="cov0" title="0">{
+                result += ", "
+        }</span>
+        <span class="cov8" title="1">result += node.value
+        right := t.inorderTraversal(node.right)
+        if right != "" </span><span class="cov8" title="1">{
+                result += ", " + right
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+
+// SaveToBinary сохраняет дерево в бинарном формате
+func (t *AVLTree) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(w, binary.LittleEndian, int32(t.count)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return t.saveBinaryNode(w, t.root)</span>
+}
+
+// saveBinaryNode сохраняет узел рекурсивно
+func (t *AVLTree) saveBinaryNode(w io.Writer, node *avlNode) error <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return binary.Write(w, binary.LittleEndian, int32(0))
+        }</span>
+
+        // Записываем что узел существует
+        <span class="cov8" title="1">if err := binary.Write(w, binary.LittleEndian, int32(1)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Записываем значение
+        <span class="cov8" title="1">if err := binary.Write(w, binary.LittleEndian, int32(len(node.value))); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if _, err := w.Write([]byte(node.value)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Рекурсивно сохраняем детей
+        <span class="cov8" title="1">if err := t.saveBinaryNode(w, node.left); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return t.saveBinaryNode(w, node.right)</span>
+}
+
+// LoadFromBinary загружает дерево из бинарного формата
+func (t *AVLTree) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        t.Clear()
+
+        var count int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;count); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">var err error
+        t.root, err = t.loadBinaryNode(r)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">t.count = int(count)
+        return nil</span>
+}
+
+// loadBinaryNode загружает узел рекурсивно
+func (t *AVLTree) loadBinaryNode(r io.Reader) (*avlNode, error) <span class="cov8" title="1">{
+        var exists int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;exists); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if exists == 0 </span><span class="cov8" title="1">{
+                return nil, nil
+        }</span>
+
+        // Читаем значение
+        <span class="cov8" title="1">var valueLen int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;valueLen); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">valueBytes := make([]byte, valueLen)
+        if _, err := io.ReadFull(r, valueBytes); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">node := &amp;avlNode{value: string(valueBytes), height: 1}
+
+        // Рекурсивно загружаем детей
+        var err error
+        node.left, err = t.loadBinaryNode(r)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">node.right, err = t.loadBinaryNode(r)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">t.updateHeight(node)
+        return node, nil</span>
+}
+
+// ToJSON сериализует дерево в JSON (inorder обход)
+func (t *AVLTree) ToJSON() (string, error) <span class="cov8" title="1">{
+        values := t.inorderValues(t.root)
+        bytes, err := json.Marshal(values)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return string(bytes), nil</span>
+}
+
+// inorderValues получает все значения в порядке inorder
+func (t *AVLTree) inorderValues(node *avlNode) []string <span class="cov8" title="1">{
+        if node == nil </span><span class="cov8" title="1">{
+                return []string{}
+        }</span>
+        <span class="cov8" title="1">result := t.inorderValues(node.left)
+        result = append(result, node.value)
+        result = append(result, t.inorderValues(node.right)...)
+        return result</span>
+}
+
+// FromJSON десериализует дерево из JSON
+func (t *AVLTree) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        t.Clear()
+        var values []string
+        if err := json.Unmarshal([]byte(jsonStr), &amp;values); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for _, val := range values </span><span class="cov8" title="1">{
+                t.Insert(val)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package containers
+
+import (
+        "fmt"
+        "hash/fnv"
+)
+
+// CuckooHashMap - хеш-таблица с кукушкой хешированием
+type CuckooHashMap struct {
+        table1   []cuckooEntry
+        table2   []cuckooEntry
+        capacity int
+        count    int
+}
+
+type cuckooEntry struct {
+        key      string
+        value    string
+        occupied bool
+}
+
+const (
+        cuckooDefaultCapacity = 101
+        maxCuckooIterations   = 500
+)
+
+// NewCuckooHashMap создаёт новую хеш-таблицу с кукушкой
+func NewCuckooHashMap(initialCapacity int) *CuckooHashMap <span class="cov8" title="1">{
+        if initialCapacity &lt;= 0 </span><span class="cov0" title="0">{
+                initialCapacity = cuckooDefaultCapacity
+        }</span>
+        <span class="cov8" title="1">return &amp;CuckooHashMap{
+                table1:   make([]cuckooEntry, initialCapacity),
+                table2:   make([]cuckooEntry, initialCapacity),
+                capacity: initialCapacity,
+                count:    0,
+        }</span>
+}
+
+// hash1 первая хеш-функция
+func (ch *CuckooHashMap) hash1(key string) int <span class="cov8" title="1">{
+        hasher := fnv.New32a()
+        hasher.Write([]byte(key))
+        return int(hasher.Sum32()) % ch.capacity
+}</span>
+
+// hash2 вторая хеш-функция
+func (ch *CuckooHashMap) hash2(key string) int <span class="cov8" title="1">{
+        hasher := fnv.New32a()
+        hasher.Write([]byte(key))
+        return int(hasher.Sum32()/uint32(ch.capacity)) % ch.capacity
+}</span>
+
+// insertInternal вспомогательная функция для вставки с ограничением итераций
+func (ch *CuckooHashMap) insertInternal(key string, value string, iterations int) error <span class="cov8" title="1">{
+        if iterations &gt;= maxCuckooIterations </span><span class="cov8" title="1">{
+                return fmt.Errorf("слишком много итераций, требуется рехеширование")
+        }</span>
+
+        <span class="cov8" title="1">idx1 := ch.hash1(key)
+
+        // Пробуем table1
+        if !ch.table1[idx1].occupied </span><span class="cov8" title="1">{
+                ch.table1[idx1] = cuckooEntry{key: key, value: value, occupied: true}
+                return nil
+        }</span>
+
+        // Если ключ уже есть в table1, обновляем
+        <span class="cov8" title="1">if ch.table1[idx1].key == key </span><span class="cov0" title="0">{
+                ch.table1[idx1].value = value
+                return nil
+        }</span>
+
+        // Вытесняем из table1
+        <span class="cov8" title="1">oldKey := ch.table1[idx1].key
+        oldValue := ch.table1[idx1].value
+        ch.table1[idx1] = cuckooEntry{key: key, value: value, occupied: true}
+
+        idx2 := ch.hash2(oldKey)
+
+        // Пробуем table2
+        if !ch.table2[idx2].occupied </span><span class="cov8" title="1">{
+                ch.table2[idx2] = cuckooEntry{key: oldKey, value: oldValue, occupied: true}
+                return nil
+        }</span>
+
+        // Если ключ уже есть в table2, обновляем
+        <span class="cov8" title="1">if ch.table2[idx2].key == oldKey </span><span class="cov0" title="0">{
+                ch.table2[idx2].value = oldValue
+                return nil
+        }</span>
+
+        // Вытесняем из table2
+        <span class="cov8" title="1">nextKey := ch.table2[idx2].key
+        nextValue := ch.table2[idx2].value
+        ch.table2[idx2] = cuckooEntry{key: oldKey, value: oldValue, occupied: true}
+
+        // Рекурсивно вставляем вытесненный элемент
+        return ch.insertInternal(nextKey, nextValue, iterations+1)</span>
+}
+
+// Put добавляет или обновляет пару ключ-значение
+func (ch *CuckooHashMap) Put(key string, value string) error <span class="cov8" title="1">{
+        if ch.count &gt;= ch.capacity*2 </span><span class="cov8" title="1">{
+                return fmt.Errorf("хеш-таблица заполнена")
+        }</span>
+
+        // Проверяем, есть ли уже такой ключ
+        <span class="cov8" title="1">if ch.Contains(key) </span><span class="cov8" title="1">{
+                idx1 := ch.hash1(key)
+                idx2 := ch.hash2(key)
+
+                if ch.table1[idx1].occupied &amp;&amp; ch.table1[idx1].key == key </span><span class="cov8" title="1">{
+                        ch.table1[idx1].value = value
+                        return nil
+                }</span>
+                <span class="cov0" title="0">if ch.table2[idx2].occupied &amp;&amp; ch.table2[idx2].key == key </span><span class="cov0" title="0">{
+                        ch.table2[idx2].value = value
+                        return nil
+                }</span>
+        }
+
+        <span class="cov8" title="1">err := ch.insertInternal(key, value, 0)
+        if err == nil </span><span class="cov8" title="1">{
+                ch.count++
+        }</span>
+        <span class="cov8" title="1">return err</span>
+}
+
+// Get возвращает значение по ключу
+func (ch *CuckooHashMap) Get(key string) (string, error) <span class="cov8" title="1">{
+        idx1 := ch.hash1(key)
+        idx2 := ch.hash2(key)
+
+        if ch.table1[idx1].occupied &amp;&amp; ch.table1[idx1].key == key </span><span class="cov8" title="1">{
+                return ch.table1[idx1].value, nil
+        }</span>
+        <span class="cov8" title="1">if ch.table2[idx2].occupied &amp;&amp; ch.table2[idx2].key == key </span><span class="cov8" title="1">{
+                return ch.table2[idx2].value, nil
+        }</span>
+        <span class="cov8" title="1">return "", fmt.Errorf("ключ не найден")</span>
+}
+
+// Contains проверяет наличие ключа
+func (ch *CuckooHashMap) Contains(key string) bool <span class="cov8" title="1">{
+        idx1 := ch.hash1(key)
+        idx2 := ch.hash2(key)
+
+        return (ch.table1[idx1].occupied &amp;&amp; ch.table1[idx1].key == key) ||
+                (ch.table2[idx2].occupied &amp;&amp; ch.table2[idx2].key == key)
+}</span>
+
+// Remove удаляет пару по ключу
+func (ch *CuckooHashMap) Remove(key string) bool <span class="cov8" title="1">{
+        idx1 := ch.hash1(key)
+        idx2 := ch.hash2(key)
+
+        if ch.table1[idx1].occupied &amp;&amp; ch.table1[idx1].key == key </span><span class="cov8" title="1">{
+                ch.table1[idx1].occupied = false
+                ch.count--
+                return true
+        }</span>
+        <span class="cov8" title="1">if ch.table2[idx2].occupied &amp;&amp; ch.table2[idx2].key == key </span><span class="cov0" title="0">{
+                ch.table2[idx2].occupied = false
+                ch.count--
+                return true
+        }</span>
+        <span class="cov8" title="1">return false</span>
+}
+
+// Clear очищает таблицу
+func (ch *CuckooHashMap) Clear() <span class="cov8" title="1">{
+        for i := range ch.table1 </span><span class="cov8" title="1">{
+                ch.table1[i].occupied = false
+        }</span>
+        <span class="cov8" title="1">for i := range ch.table2 </span><span class="cov8" title="1">{
+                ch.table2[i].occupied = false
+        }</span>
+        <span class="cov8" title="1">ch.count = 0</span>
+}
+
+// Size возвращает количество элементов
+func (ch *CuckooHashMap) Size() int <span class="cov8" title="1">{
+        return ch.count
+}</span>
+
+// Print выводит хеш-таблицу
+func (ch *CuckooHashMap) Print() string <span class="cov8" title="1">{
+        result := "CuckooHashMap {\n  Table 1:\n"
+        for i, e := range ch.table1 </span><span class="cov8" title="1">{
+                if e.occupied </span><span class="cov8" title="1">{
+                        result += fmt.Sprintf("    [%d] %s =&gt; %s\n", i, e.key, e.value)
+                }</span>
+        }
+        <span class="cov8" title="1">result += "  Table 2:\n"
+        for i, e := range ch.table2 </span><span class="cov8" title="1">{
+                if e.occupied </span><span class="cov0" title="0">{
+                        result += fmt.Sprintf("    [%d] %s =&gt; %s\n", i, e.key, e.value)
+                }</span>
+        }
+        <span class="cov8" title="1">result += fmt.Sprintf("} (size: %d)", ch.count)
+        return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "fmt"
+        "io"
+)
+
+// DoubleList - двусвязный список
+type DoubleList struct {
+        head  *doubleNode
+        tail  *doubleNode
+        count int
+}
+
+type doubleNode struct {
+        data int
+        next *doubleNode
+        prev *doubleNode
+}
+
+// NewDoubleList создаёт новый двусвязный список
+func NewDoubleList() *DoubleList <span class="cov8" title="1">{
+        return &amp;DoubleList{
+                head:  nil,
+                tail:  nil,
+                count: 0,
+        }
+}</span>
+
+// AddHead добавляет элемент в начало
+func (dl *DoubleList) AddHead(value int) <span class="cov8" title="1">{
+        newNode := &amp;doubleNode{data: value, next: dl.head, prev: nil}
+
+        if dl.head != nil </span><span class="cov8" title="1">{
+                dl.head.prev = newNode
+        }</span> else<span class="cov8" title="1"> {
+                dl.tail = newNode
+        }</span>
+        <span class="cov8" title="1">dl.head = newNode
+        dl.count++</span>
+}
+
+// AddTail добавляет элемент в конец
+func (dl *DoubleList) AddTail(value int) <span class="cov8" title="1">{
+        newNode := &amp;doubleNode{data: value, next: nil, prev: dl.tail}
+
+        if dl.tail != nil </span><span class="cov8" title="1">{
+                dl.tail.next = newNode
+        }</span> else<span class="cov8" title="1"> {
+                dl.head = newNode
+        }</span>
+        <span class="cov8" title="1">dl.tail = newNode
+        dl.count++</span>
+}
+
+// Remove удаляет первое вхождение элемента
+func (dl *DoubleList) Remove(value int) bool <span class="cov8" title="1">{
+        current := dl.head
+
+        for current != nil </span><span class="cov8" title="1">{
+                if current.data == value </span><span class="cov8" title="1">{
+                        if current.prev != nil </span><span class="cov8" title="1">{
+                                current.prev.next = current.next
+                        }</span> else<span class="cov8" title="1"> {
+                                dl.head = current.next
+                        }</span>
+
+                        <span class="cov8" title="1">if current.next != nil </span><span class="cov8" title="1">{
+                                current.next.prev = current.prev
+                        }</span> else<span class="cov8" title="1"> {
+                                dl.tail = current.prev
+                        }</span>
+
+                        <span class="cov8" title="1">dl.count--
+                        return true</span>
+                }
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// Contains проверяет наличие элемента
+func (dl *DoubleList) Contains(value int) bool <span class="cov8" title="1">{
+        current := dl.head
+        for current != nil </span><span class="cov8" title="1">{
+                if current.data == value </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// Size возвращает количество элементов
+func (dl *DoubleList) Size() int <span class="cov8" title="1">{
+        return dl.count
+}</span>
+
+// Clear очищает список
+func (dl *DoubleList) Clear() <span class="cov8" title="1">{
+        dl.head = nil
+        dl.tail = nil
+        dl.count = 0
+}</span>
+
+// Print выводит список
+func (dl *DoubleList) Print() string <span class="cov8" title="1">{
+        if dl.head == nil </span><span class="cov8" title="1">{
+                return "[]"
+        }</span>
+
+        <span class="cov8" title="1">result := "["
+        current := dl.head
+        first := true
+        for current != nil </span><span class="cov8" title="1">{
+                if !first </span><span class="cov8" title="1">{
+                        result += " &lt;-&gt; "
+                }</span>
+                <span class="cov8" title="1">result += fmt.Sprintf("%d", current.data)
+                first = false
+                current = current.next</span>
+        }
+        <span class="cov8" title="1">result += "]"
+        return result</span>
+}
+
+// SaveToBinary сохраняет список в бинарном формате
+func (dl *DoubleList) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(w, binary.LittleEndian, int32(dl.count)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">current := dl.head
+        for current != nil </span><span class="cov8" title="1">{
+                if err := binary.Write(w, binary.LittleEndian, int32(current.data)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает список из бинарного формата
+func (dl *DoubleList) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        dl.Clear()
+
+        var count int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;count); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for i := 0; i &lt; int(count); i++ </span><span class="cov8" title="1">{
+                var value int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">dl.AddTail(int(value))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "hash/fnv"
+        "io"
+)
+
+// HashMap - хеш-таблица с двойным хешированием
+type HashMap struct {
+        table    []entry
+        capacity int
+        count    int
+}
+
+type entry struct {
+        key      string
+        value    string
+        occupied bool
+}
+
+const defaultCapacity = 101
+
+// NewHashMap создаёт новую хеш-таблицу
+func NewHashMap(initialCapacity int) *HashMap <span class="cov8" title="1">{
+        if initialCapacity &lt;= 0 </span><span class="cov0" title="0">{
+                initialCapacity = defaultCapacity
+        }</span>
+        <span class="cov8" title="1">return &amp;HashMap{
+                table:    make([]entry, initialCapacity),
+                capacity: initialCapacity,
+                count:    0,
+        }</span>
+}
+
+// hash1 первая хеш-функция
+func (h *HashMap) hash1(key string) int <span class="cov8" title="1">{
+        hasher := fnv.New32a()
+        hasher.Write([]byte(key))
+        return int(hasher.Sum32()) % h.capacity
+}</span>
+
+// hash2 вторая хеш-функция (для двойного хеширования)
+func (h *HashMap) hash2(key string) int <span class="cov8" title="1">{
+        hasher := fnv.New32a()
+        hasher.Write([]byte(key))
+        h2 := int(hasher.Sum32()) % (h.capacity - 1)
+        if h2 == 0 </span><span class="cov8" title="1">{
+                return 1
+        }</span>
+        <span class="cov8" title="1">return h2</span>
+}
+
+// findIndex ищет индекс для ключа
+func (h *HashMap) findIndex(key string) (int, bool) <span class="cov8" title="1">{
+        h1 := h.hash1(key)
+        h2 := h.hash2(key)
+        index := h1
+
+        for i := 0; i &lt; h.capacity; i++ </span><span class="cov8" title="1">{
+                if !h.table[index].occupied </span><span class="cov8" title="1">{
+                        return index, false
+                }</span>
+                <span class="cov8" title="1">if h.table[index].key == key </span><span class="cov8" title="1">{
+                        return index, true
+                }</span>
+                <span class="cov8" title="1">index = (h1 + (i+1)*h2) % h.capacity</span>
+        }
+        <span class="cov0" title="0">return -1, false</span>
+}
+
+// Put добавляет или обновляет пару ключ-значение
+func (h *HashMap) Put(key string, value string) error <span class="cov8" title="1">{
+        if h.count &gt;= h.capacity </span><span class="cov8" title="1">{
+                return fmt.Errorf("хеш-таблица заполнена")
+        }</span>
+
+        <span class="cov8" title="1">index, found := h.findIndex(key)
+        if index == -1 </span><span class="cov0" title="0">{
+                return fmt.Errorf("хеш-таблица заполнена")
+        }</span>
+
+        <span class="cov8" title="1">if found </span><span class="cov8" title="1">{
+                h.table[index].value = value
+        }</span> else<span class="cov8" title="1"> {
+                h.table[index] = entry{key: key, value: value, occupied: true}
+                h.count++
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Get возвращает значение по ключу
+func (h *HashMap) Get(key string) (string, error) <span class="cov8" title="1">{
+        index, found := h.findIndex(key)
+        if !found </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("ключ не найден")
+        }</span>
+        <span class="cov8" title="1">return h.table[index].value, nil</span>
+}
+
+// Contains проверяет наличие ключа
+func (h *HashMap) Contains(key string) bool <span class="cov8" title="1">{
+        _, found := h.findIndex(key)
+        return found
+}</span>
+
+// Remove удаляет пару по ключу
+func (h *HashMap) Remove(key string) bool <span class="cov8" title="1">{
+        index, found := h.findIndex(key)
+        if !found </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">h.table[index].occupied = false
+        h.count--
+        return true</span>
+}
+
+// Clear очищает таблицу
+func (h *HashMap) Clear() <span class="cov8" title="1">{
+        for i := range h.table </span><span class="cov8" title="1">{
+                h.table[i].occupied = false
+        }</span>
+        <span class="cov8" title="1">h.count = 0</span>
+}
+
+// Size возвращает количество элементов
+func (h *HashMap) Size() int <span class="cov8" title="1">{
+        return h.count
+}</span>
+
+// Print выводит хеш-таблицу
+func (h *HashMap) Print() string <span class="cov8" title="1">{
+        result := "HashMap {\n"
+        for i, e := range h.table </span><span class="cov8" title="1">{
+                if e.occupied </span><span class="cov8" title="1">{
+                        result += fmt.Sprintf("  [%d] %s =&gt; %s\n", i, e.key, e.value)
+                }</span>
+        }
+        <span class="cov8" title="1">result += fmt.Sprintf("} (size: %d)", h.count)
+        return result</span>
+}
+
+// SaveToBinary сохраняет хеш-таблицу в бинарном формате
+func (h *HashMap) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(w, binary.LittleEndian, int32(h.count)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for _, e := range h.table </span><span class="cov8" title="1">{
+                if e.occupied </span><span class="cov8" title="1">{
+                        // Записываем длину ключа и сам ключ
+                        if err := binary.Write(w, binary.LittleEndian, int32(len(e.key))); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">if _, err := w.Write([]byte(e.key)); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        // Записываем длину значения и само значение
+                        <span class="cov8" title="1">if err := binary.Write(w, binary.LittleEndian, int32(len(e.value))); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">if _, err := w.Write([]byte(e.value)); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                }
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает хеш-таблицу из бинарного формата
+func (h *HashMap) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        h.Clear()
+
+        var count int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;count); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for i := 0; i &lt; int(count); i++ </span><span class="cov8" title="1">{
+                // Читаем ключ
+                var keyLen int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;keyLen); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">keyBytes := make([]byte, keyLen)
+                if _, err := io.ReadFull(r, keyBytes); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // Читаем значение
+                <span class="cov8" title="1">var valueLen int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;valueLen); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">valueBytes := make([]byte, valueLen)
+                if _, err := io.ReadFull(r, valueBytes); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">if err := h.Put(string(keyBytes), string(valueBytes)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// ToJSON сериализует HashMap в JSON
+func (h *HashMap) ToJSON() (string, error) <span class="cov8" title="1">{
+        data := make(map[string]string)
+        for i := 0; i &lt; h.capacity; i++ </span><span class="cov8" title="1">{
+                if h.table[i].occupied </span><span class="cov8" title="1">{
+                        data[h.table[i].key] = h.table[i].value
+                }</span>
+        }
+        <span class="cov8" title="1">bytes, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return string(bytes), nil</span>
+}
+
+// FromJSON десериализует HashMap из JSON
+func (h *HashMap) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        h.Clear()
+        var data map[string]string
+        if err := json.Unmarshal([]byte(jsonStr), &amp;data); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for key, value := range data </span><span class="cov8" title="1">{
+                if err := h.Put(key, value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+)
+
+// Queue - очередь (FIFO)
+type Queue struct {
+        data     []int
+        capacity int
+        head     int
+        tail     int
+        size     int
+}
+
+// NewQueue создаёт новую очередь
+func NewQueue(initialCapacity int) *Queue <span class="cov8" title="1">{
+        if initialCapacity &lt;= 0 </span><span class="cov0" title="0">{
+                initialCapacity = 10
+        }</span>
+        <span class="cov8" title="1">return &amp;Queue{
+                data:     make([]int, initialCapacity),
+                capacity: initialCapacity,
+                head:     0,
+                tail:     0,
+                size:     0,
+        }</span>
+}
+
+// Enqueue добавляет элемент в конец очереди
+func (q *Queue) Enqueue(value int) <span class="cov8" title="1">{
+        if q.size &gt;= q.capacity </span><span class="cov8" title="1">{
+                q.resize(q.capacity * 2)
+        }</span>
+        <span class="cov8" title="1">q.data[q.tail] = value
+        q.tail = (q.tail + 1) % q.capacity
+        q.size++</span>
+}
+
+// Dequeue удаляет и возвращает элемент из начала очереди
+func (q *Queue) Dequeue() (int, error) <span class="cov8" title="1">{
+        if q.size == 0 </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("очередь пуста")
+        }</span>
+        <span class="cov8" title="1">value := q.data[q.head]
+        q.head = (q.head + 1) % q.capacity
+        q.size--
+        return value, nil</span>
+}
+
+// Peek возвращает элемент из начала очереди без удаления
+func (q *Queue) Peek() (int, error) <span class="cov8" title="1">{
+        if q.size == 0 </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("очередь пуста")
+        }</span>
+        <span class="cov8" title="1">return q.data[q.head], nil</span>
+}
+
+// Size возвращает количество элементов
+func (q *Queue) Size() int <span class="cov8" title="1">{
+        return q.size
+}</span>
+
+// Clear очищает очередь
+func (q *Queue) Clear() <span class="cov8" title="1">{
+        q.head = 0
+        q.tail = 0
+        q.size = 0
+}</span>
+
+// Print выводит очередь
+func (q *Queue) Print() string <span class="cov8" title="1">{
+        if q.size == 0 </span><span class="cov8" title="1">{
+                return "[]"
+        }</span>
+        <span class="cov8" title="1">result := "["
+        idx := q.head
+        for i := 0; i &lt; q.size; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        result += ", "
+                }</span>
+                <span class="cov8" title="1">result += fmt.Sprintf("%d", q.data[idx])
+                idx = (idx + 1) % q.capacity</span>
+        }
+        <span class="cov8" title="1">result += "]"
+        return result</span>
+}
+
+// resize увеличивает ёмкость очереди
+func (q *Queue) resize(newCapacity int) <span class="cov8" title="1">{
+        newData := make([]int, newCapacity)
+        idx := q.head
+        for i := 0; i &lt; q.size; i++ </span><span class="cov8" title="1">{
+                newData[i] = q.data[idx]
+                idx = (idx + 1) % q.capacity
+        }</span>
+        <span class="cov8" title="1">q.data = newData
+        q.capacity = newCapacity
+        q.head = 0
+        q.tail = q.size</span>
+}
+
+// SaveToBinary сохраняет очередь в бинарном формате
+func (q *Queue) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(w, binary.LittleEndian, int32(q.size)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">idx := q.head
+        for i := 0; i &lt; q.size; i++ </span><span class="cov8" title="1">{
+                if err := binary.Write(w, binary.LittleEndian, int32(q.data[idx])); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">idx = (idx + 1) % q.capacity</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает очередь из бинарного формата
+func (q *Queue) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        q.Clear()
+
+        var size int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for i := 0; i &lt; int(size); i++ </span><span class="cov8" title="1">{
+                var value int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">q.Enqueue(int(value))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// ToJSON сериализует очередь в JSON
+func (q *Queue) ToJSON() (string, error) <span class="cov8" title="1">{
+        data := make([]int, q.size)
+        idx := q.head
+        for i := 0; i &lt; q.size; i++ </span><span class="cov8" title="1">{
+                data[i] = q.data[idx]
+                idx = (idx + 1) % q.capacity
+        }</span>
+        <span class="cov8" title="1">bytes, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return string(bytes), nil</span>
+}
+
+// FromJSON десериализует очередь из JSON
+func (q *Queue) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        q.Clear()
+        var data []int
+        if err := json.Unmarshal([]byte(jsonStr), &amp;data); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for _, val := range data </span><span class="cov8" title="1">{
+                q.Enqueue(val)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package containers
+
+// Set - множество на основе HashMap
+type Set struct {
+        hashMap *HashMap
+}
+
+// NewSet создаёт новое множество
+func NewSet(initialCapacity int) *Set <span class="cov8" title="1">{
+        return &amp;Set{
+                hashMap: NewHashMap(initialCapacity),
+        }
+}</span>
+
+// Add добавляет элемент в множество
+func (s *Set) Add(value string) error <span class="cov8" title="1">{
+        return s.hashMap.Put(value, "")
+}</span>
+
+// Contains проверяет наличие элемента
+func (s *Set) Contains(value string) bool <span class="cov8" title="1">{
+        return s.hashMap.Contains(value)
+}</span>
+
+// Remove удаляет элемент из множества
+func (s *Set) Remove(value string) bool <span class="cov8" title="1">{
+        return s.hashMap.Remove(value)
+}</span>
+
+// Clear очищает множество
+func (s *Set) Clear() <span class="cov8" title="1">{
+        s.hashMap.Clear()
+}</span>
+
+// Size возвращает количество элементов
+func (s *Set) Size() int <span class="cov8" title="1">{
+        return s.hashMap.Size()
+}</span>
+
+// Print выводит множество
+func (s *Set) Print() string <span class="cov8" title="1">{
+        return s.hashMap.Print()
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "fmt"
+        "io"
+)
+
+// SingleList - односвязный список
+type SingleList struct {
+        head  *singleNode
+        count int
+}
+
+type singleNode struct {
+        data int
+        next *singleNode
+}
+
+// NewSingleList создаёт новый односвязный список
+func NewSingleList() *SingleList <span class="cov8" title="1">{
+        return &amp;SingleList{
+                head:  nil,
+                count: 0,
+        }
+}</span>
+
+// AddHead добавляет элемент в начало
+func (sl *SingleList) AddHead(value int) <span class="cov8" title="1">{
+        newNode := &amp;singleNode{data: value, next: sl.head}
+        sl.head = newNode
+        sl.count++
+}</span>
+
+// AddTail добавляет элемент в конец
+func (sl *SingleList) AddTail(value int) <span class="cov8" title="1">{
+        newNode := &amp;singleNode{data: value, next: nil}
+
+        if sl.head == nil </span><span class="cov8" title="1">{
+                sl.head = newNode
+        }</span> else<span class="cov8" title="1"> {
+                current := sl.head
+                for current.next != nil </span><span class="cov8" title="1">{
+                        current = current.next
+                }</span>
+                <span class="cov8" title="1">current.next = newNode</span>
+        }
+        <span class="cov8" title="1">sl.count++</span>
+}
+
+// Remove удаляет первое вхождение элемента
+func (sl *SingleList) Remove(value int) bool <span class="cov8" title="1">{
+        if sl.head == nil </span><span class="cov8" title="1">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">if sl.head.data == value </span><span class="cov8" title="1">{
+                sl.head = sl.head.next
+                sl.count--
+                return true
+        }</span>
+
+        <span class="cov8" title="1">current := sl.head
+        for current.next != nil </span><span class="cov8" title="1">{
+                if current.next.data == value </span><span class="cov8" title="1">{
+                        current.next = current.next.next
+                        sl.count--
+                        return true
+                }</span>
+                <span class="cov0" title="0">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// Contains проверяет наличие элемента
+func (sl *SingleList) Contains(value int) bool <span class="cov8" title="1">{
+        current := sl.head
+        for current != nil </span><span class="cov8" title="1">{
+                if current.data == value </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// Size возвращает количество элементов
+func (sl *SingleList) Size() int <span class="cov8" title="1">{
+        return sl.count
+}</span>
+
+// Clear очищает список
+func (sl *SingleList) Clear() <span class="cov8" title="1">{
+        sl.head = nil
+        sl.count = 0
+}</span>
+
+// Print выводит список
+func (sl *SingleList) Print() string <span class="cov8" title="1">{
+        if sl.head == nil </span><span class="cov8" title="1">{
+                return "[]"
+        }</span>
+
+        <span class="cov8" title="1">result := "["
+        current := sl.head
+        first := true
+        for current != nil </span><span class="cov8" title="1">{
+                if !first </span><span class="cov8" title="1">{
+                        result += " -&gt; "
+                }</span>
+                <span class="cov8" title="1">result += fmt.Sprintf("%d", current.data)
+                first = false
+                current = current.next</span>
+        }
+        <span class="cov8" title="1">result += "]"
+        return result</span>
+}
+
+// SaveToBinary сохраняет список в бинарном формате
+func (sl *SingleList) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        if err := binary.Write(w, binary.LittleEndian, int32(sl.count)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">current := sl.head
+        for current != nil </span><span class="cov8" title="1">{
+                if err := binary.Write(w, binary.LittleEndian, int32(current.data)); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает список из бинарного формата
+func (sl *SingleList) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        sl.Clear()
+
+        var count int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;count); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for i := 0; i &lt; int(count); i++ </span><span class="cov8" title="1">{
+                var value int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">sl.AddTail(int(value))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package containers
+
+import (
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
+        "io"
+)
+
+// Stack - стек (LIFO)
+type Stack struct {
+        data     []int
+        capacity int
+        top      int
+}
+
+// NewStack создаёт новый стек
+func NewStack(initialCapacity int) *Stack <span class="cov8" title="1">{
+        if initialCapacity &lt;= 0 </span><span class="cov0" title="0">{
+                initialCapacity = 10
+        }</span>
+        <span class="cov8" title="1">return &amp;Stack{
+                data:     make([]int, initialCapacity),
+                capacity: initialCapacity,
+                top:      -1,
+        }</span>
+}
+
+// Push добавляет элемент на вершину стека
+func (s *Stack) Push(value int) <span class="cov8" title="1">{
+        if s.top+1 &gt;= s.capacity </span><span class="cov8" title="1">{
+                s.resize(s.capacity * 2)
+        }</span>
+        <span class="cov8" title="1">s.top++
+        s.data[s.top] = value</span>
+}
+
+// Pop удаляет и возвращает элемент с вершины
+func (s *Stack) Pop() (int, error) <span class="cov8" title="1">{
+        if s.top &lt; 0 </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("стек пуст")
+        }</span>
+        <span class="cov8" title="1">value := s.data[s.top]
+        s.top--
+        return value, nil</span>
+}
+
+// Peek возвращает элемент с вершины без удаления
+func (s *Stack) Peek() (int, error) <span class="cov8" title="1">{
+        if s.top &lt; 0 </span><span class="cov8" title="1">{
+                return 0, fmt.Errorf("стек пуст")
+        }</span>
+        <span class="cov8" title="1">return s.data[s.top], nil</span>
+}
+
+// Size возвращает количество элементов
+func (s *Stack) Size() int <span class="cov8" title="1">{
+        return s.top + 1
+}</span>
+
+// Clear очищает стек
+func (s *Stack) Clear() <span class="cov8" title="1">{
+        s.top = -1
+}</span>
+
+// Print выводит стек
+func (s *Stack) Print() string <span class="cov8" title="1">{
+        if s.top &lt; 0 </span><span class="cov8" title="1">{
+                return "[]"
+        }</span>
+        <span class="cov8" title="1">result := "["
+        for i := 0; i &lt;= s.top; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        result += ", "
+                }</span>
+                <span class="cov8" title="1">result += fmt.Sprintf("%d", s.data[i])</span>
+        }
+        <span class="cov8" title="1">result += "]"
+        return result</span>
+}
+
+// resize увеличивает ёмкость стека
+func (s *Stack) resize(newCapacity int) <span class="cov8" title="1">{
+        newData := make([]int, newCapacity)
+        copy(newData, s.data[:s.top+1])
+        s.data = newData
+        s.capacity = newCapacity
+}</span>
+
+// SaveToBinary сохраняет стек в бинарном формате
+func (s *Stack) SaveToBinary(w io.Writer) error <span class="cov8" title="1">{
+        size := s.Size()
+        if err := binary.Write(w, binary.LittleEndian, int32(size)); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for i := 0; i &lt; size; i++ </span><span class="cov8" title="1">{
+                if err := binary.Write(w, binary.LittleEndian, int32(s.data[i])); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// LoadFromBinary загружает стек из бинарного формата
+func (s *Stack) LoadFromBinary(r io.Reader) error <span class="cov8" title="1">{
+        s.Clear()
+
+        var size int32
+        if err := binary.Read(r, binary.LittleEndian, &amp;size); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for i := 0; i &lt; int(size); i++ </span><span class="cov8" title="1">{
+                var value int32
+                if err := binary.Read(r, binary.LittleEndian, &amp;value); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">s.Push(int(value))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// ToJSON сериализует стек в JSON
+func (s *Stack) ToJSON() (string, error) <span class="cov8" title="1">{
+        data := s.data[:s.top+1]
+        bytes, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return string(bytes), nil</span>
+}
+
+// FromJSON десериализует стек из JSON
+func (s *Stack) FromJSON(jsonStr string) error <span class="cov8" title="1">{
+        s.Clear()
+        var data []int
+        if err := json.Unmarshal([]byte(jsonStr), &amp;data); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">for _, val := range data </span><span class="cov8" title="1">{
+                s.Push(val)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
